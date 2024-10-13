@@ -27,13 +27,13 @@ interface ApiResponse {
 }
 
 const ChatMessages: React.FC = () => {
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<JSX.Element[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState<number>(5);
   const [isTimerActive, setIsTimerActive] = useState<boolean>(true);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [token, setToken] = useState<string>('');
-  const [chatId, setChatId] = useState<string>( '');
+  const [chatId, setChatId] = useState<string>('');
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -64,31 +64,40 @@ const ChatMessages: React.FC = () => {
     }
 
     try {
-      const response = await axios.get<ApiResponse>(`https://cors-anywhere-lilac-two.vercel.app/chatgpt.com/backend-api/conversation/${chatId}`, {
+      console.log('Fetching messages with token and chat ID');
+      const response = await axios.get<ApiResponse>(`https://chatgpt.com/backend-api/conversation/${chatId}`, {
         headers: {
           'accept': '*/*',
           'authorization': `Bearer ${token}`,
+          'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
         }
       });
 
-      const newMessages: string[] = [];
+      const newMessages: JSX.Element[] = [];
       for (const key in response.data.mapping) {
         const message = response.data.mapping[key].message;
         if (message && message.content.parts) {
           message.content.parts.forEach(part => {
             if (part.content_type === 'audio_transcription' && part.text) {
-              const containsChinese = /[\u4e00-\u9fa5]/.test(part.text);
-              if (containsChinese) {
-                const pinyinText = pinyin(part.text, { style: pinyin.STYLE_TONE }).flat().join(' ');
-                newMessages.push(`${part.text} (${pinyinText})`);
-              } else {
-                newMessages.push(part.text);
-              }
+              const processedText = part.text.split('').map((char, index) => {
+                if (/[\u4e00-\u9fa5]/.test(char)) {
+                  const pinyinText = pinyin(char, { style: pinyin.STYLE_TONE }).flat().join('');
+                  return (
+                    <span key={index} className="text-lg inline-flex flex-col items-center">
+                      <span>{char}</span>
+                      <span className="text-xs text-gray-500">{pinyinText}</span>
+                    </span>
+                  );
+                } else {
+                  return <span key={index} className="text-sm text-gray-500">{char}</span>;
+                }
+              });
+              newMessages.unshift(<div key={part.text}>{processedText}</div>);
             }
           });
         }
       }
-      setMessages(newMessages.reverse());
+      setMessages(newMessages);
     } catch (err: any) {
       console.error('Error fetching messages:', err);
       setError(err.message);
@@ -114,24 +123,17 @@ const ChatMessages: React.FC = () => {
   };
 
   const handleSaveSettings = () => {
-    localStorage.setItem('apiToken', token);
-    localStorage.setItem('chatId', chatId);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('apiToken', token);
+      localStorage.setItem('chatId', chatId);
+    }
     setShowSettings(false);
     fetchMessages(); // Trigger fetch after saving settings
   };
 
-  // useEffect(() => {
-  //   fetchMessages();
-  //   startTimer();
-
-  //   return () => {
-  //     stopTimer();
-  //   };
-  // }, []);
-
   return (
-    <div className="p-4 max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
-      <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">ChatGPT Lingo Live</h1>
+    <div className="p-8 max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
+      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">ChatGPT Lingo Live</h1>
       {error && <p className="text-red-500 mb-6 text-xl">{error}</p>}
       <div className="flex justify-between mb-8">
         <div>
@@ -141,64 +143,58 @@ const ChatMessages: React.FC = () => {
               stopTimer();
               startTimer();
             }}
-            className=" py-3 px-3 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition duration-300 mr-4"
+            className=" py-2 px-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition duration-300 mr-4"
           >
-            Refresh
+            Refresh Now
           </button>
-          {isTimerActive && (<button
+          <button
             onClick={stopTimer}
-            className=" py-3 px-3 bg-white text-gray-700 text-lg font-semibold rounded-lg hover:bg-gray-100 transition duration-300 ml-4 border border-gray-300"
+            className=" py-2 px-4 bg-white text-gray-700 text-lg font-semibold rounded-lg hover:bg-gray-100 transition duration-300 ml-4 border border-gray-300"
           >
             Stop
-          </button>)}
+          </button>
         </div>
         <button
-        onClick={() => setShowSettings(!showSettings)}
-        className=" py-3 px-3 bg-white text-gray-700 text-lg font-semibold rounded-lg hover:bg-gray-100 transition duration-300 ml-4 border border-gray-300"
+          onClick={() => setShowSettings(!showSettings)}
+          className="py-2 px-4 bg-white text-gray-700 text-lg font-semibold rounded-lg hover:bg-gray-100 transition duration-300 ml-4 border border-gray-300"
         >
           Settings
         </button>
       </div>
-      
+     
       {showSettings && (
-        <div className="mb-6 bg-blue-100 border border-gray-300 rounded-lg p-4">
+        <div className="mb-6 bg-blue-100 p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4 text-gray-800">Settings</h2>
-          <div className="mb-4">
-            <label htmlFor="apiToken" className="block text-sm font-medium text-gray-700 mb-1">API Token</label>
+          <div className="space-y-4">
             <input
-              id="apiToken"
               type="text"
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="Enter API Token"
               className="w-full p-2 border border-gray-300 rounded text-black"
             />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="chatId" className="block text-sm font-medium text-gray-700 mb-1">Chat ID</label>
             <input
-              id="chatId"
               type="text"
               value={chatId}
               onChange={(e) => setChatId(e.target.value)}
               placeholder="Enter Chat ID"
               className="w-full p-2 border border-gray-300 rounded text-black"
             />
+            <button
+              onClick={handleSaveSettings}
+              className=" py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300"
+            >
+              Save
+            </button>
           </div>
-          <button
-            onClick={handleSaveSettings}
-            className="py-2 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-300"
-          >
-            Save
-          </button>
         </div>
       )}
       <p className="text-gray-500 mb-8 text-center text-xl">Next refresh in: {countdown}s</p>
-      <ul className="space-y-6">
+      <ul className="space-y-4">
         {messages.map((message, index) => (
           <li
             key={index}
-            className={`p-6 text-gray-900 rounded-lg shadow-lg ${index === 0 ? 'text-3xl bg-yellow-200' : 'text-xl  bg-gray-200'}`}
+            className={`p-4 text-gray-900 rounded-lg shadow-lg ${index === 0 ? 'text-3xl bg-yellow-200' : 'text-xl  bg-gray-200'}`}
           >
             {message}
           </li>
