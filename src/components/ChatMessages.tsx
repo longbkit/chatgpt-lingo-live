@@ -145,12 +145,12 @@ const ChatMessages: React.FC = () => {
           >
             Refresh Now
           </button>
-          <button
+          {isTimerActive && (<button
             onClick={stopTimer}
             className=" py-3 px-6 bg-white text-gray-700 text-xl font-semibold rounded-lg hover:bg-gray-100 transition duration-300 ml-4 border border-gray-300"
           >
             Stop
-          </button>
+          </button>)}
         </div>
         <button
         onClick={() => setShowSettings(!showSettings)}
