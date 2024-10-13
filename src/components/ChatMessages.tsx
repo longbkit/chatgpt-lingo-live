@@ -64,7 +64,7 @@ const ChatMessages: React.FC = () => {
     }
 
     try {
-      const response = await axios.get<ApiResponse>(`https://chatgpt.com/backend-api/conversation/${chatId}`, {
+      const response = await axios.get<ApiResponse>(`https://cors-anywhere-lilac-two.vercel.app/chatgpt.com/backend-api/conversation/${chatId}`, {
         headers: {
           'accept': '*/*',
           'authorization': `Bearer ${token}`,
