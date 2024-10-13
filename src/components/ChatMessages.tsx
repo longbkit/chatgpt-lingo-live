@@ -130,7 +130,7 @@ const ChatMessages: React.FC = () => {
   // }, []);
 
   return (
-    <div className="p-8 max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div className="p-4 max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
       <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">ChatGPT Lingo Live</h1>
       {error && <p className="text-red-500 mb-6 text-xl">{error}</p>}
       <div className="flex justify-between mb-8">
