@@ -131,7 +131,7 @@ const ChatMessages: React.FC = () => {
 
   return (
     <div className="p-8 max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
-      <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">Chat Messages</h1>
+      <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">ChatGPT Lingo Live</h1>
       {error && <p className="text-red-500 mb-6 text-xl">{error}</p>}
       <div className="flex justify-between mb-8">
         <div>
@@ -141,20 +141,20 @@ const ChatMessages: React.FC = () => {
               stopTimer();
               startTimer();
             }}
-            className=" py-3 px-6 bg-blue-600 text-white text-xl font-semibold rounded-lg hover:bg-blue-700 transition duration-300 mr-4"
+            className=" py-3 px-3 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition duration-300 mr-4"
           >
-            Refresh Now
+            Refresh
           </button>
           {isTimerActive && (<button
             onClick={stopTimer}
-            className=" py-3 px-6 bg-white text-gray-700 text-xl font-semibold rounded-lg hover:bg-gray-100 transition duration-300 ml-4 border border-gray-300"
+            className=" py-3 px-3 bg-white text-gray-700 text-lg font-semibold rounded-lg hover:bg-gray-100 transition duration-300 ml-4 border border-gray-300"
           >
             Stop
           </button>)}
         </div>
         <button
         onClick={() => setShowSettings(!showSettings)}
-        className=" py-3 px-6 bg-white text-gray-700 text-xl font-semibold rounded-lg hover:bg-gray-100 transition duration-300 ml-4 border border-gray-300"
+        className=" py-3 px-3 bg-white text-gray-700 text-lg font-semibold rounded-lg hover:bg-gray-100 transition duration-300 ml-4 border border-gray-300"
         >
           Settings
         </button>
