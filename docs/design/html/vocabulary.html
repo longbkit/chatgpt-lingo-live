@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Vocabulary Builder</title>
+    <script>
+        function addToLearned() {
+            alert('Word added to learned vocabulary!');
+        }
+
+        function markForReview() {
+            alert('Word marked for review!');
+        }
+
+        function showTranslation(word) {
+            // Placeholder for translation logic
+            alert(`Translation for ${word}: Hello`);
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="landing.html" class="text-xl font-bold text-gray-800">LanguageApp</a>
+            <div class="flex items-center">
+                <a href="dashboard.html" class="text-gray-600 hover:text-blue-500 mx-2">Dashboard</a>
+                <a href="conversation.html" class="text-gray-600 hover:text-blue-500 mx-2">Conversation</a>
+                <a href="vocabulary.html" class="text-gray-600 hover:text-blue-500 mx-2">Vocabulary</a>
+                <a href="profile.html" class="text-gray-600 hover:text-blue-500 mx-2">Profile</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-semibold text-center">Vocabulary Builder</h2>
+        <div class="mt-8 bg-white p-6 rounded shadow">
+            <h3 class="text-xl font-semibold">Categories</h3>
+            <ul class="mt-4">
+                <li class="py-2">
+                    <a href="#" class="text-blue-500 hover:underline">Greetings</a>
+                    <span class="text-gray-600"> - 20 words, 80% mastered</span>
+                </li>
+                <li class="py-2">
+                    <a href="#" class="text-blue-500 hover:underline">Food & Drink</a>
+                    <span class="text-gray-600"> - 15 words, 60% mastered</span>
+                </li>
+                <!-- ... additional categories ... -->
+            </ul>
+        </div>
+        <div class="mt-8 bg-white p-6 rounded shadow">
+            <h3 class="text-xl font-semibold">Category: Greetings</h3>
+            <p class="mt-2 text-gray-600">Progress: 80% mastered</p>
+            <div class="mt-4">
+                <p class="text-gray-700">Word: <span class="font-bold">你好 (Nǐ hǎo)</span></p>
+                <button class="mt-4 bg-green-500 text-white px-4 py-2 rounded" onclick="addToLearned()">Add to Learned</button>
+                <button class="mt-4 bg-yellow-500 text-white px-4 py-2 rounded" onclick="markForReview()">Mark for Review</button>
+                <button class="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onclick="showTranslation('你好')">Show Translation</button>
+                <p class="mt-4 text-gray-600">Next review in: <span class="font-bold">2 days</span></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

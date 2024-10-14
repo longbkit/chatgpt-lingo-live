@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Dashboard</title>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="landing.html" class="text-xl font-bold text-gray-800">LanguageApp</a>
+            <div class="flex items-center">
+                <a href="dashboard.html" class="text-gray-600 hover:text-blue-500 mx-2">Dashboard</a>
+                <a href="conversation.html" class="text-gray-600 hover:text-blue-500 mx-2">Conversation</a>
+                <a href="leaderboard.html" class="text-gray-600 hover:text-blue-500 mx-2">Leaderboard</a>
+                <a href="vocabulary.html" class="text-gray-600 hover:text-blue-500 mx-2">Vocabulary</a>
+                <a href="profile.html" class="text-gray-600 hover:text-blue-500 mx-2">Profile</a>
+            </div>
+        </div>
+    </nav>
+    <main class="container mx-auto px-4 py-8">
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded shadow">
+                <h3 class="text-xl font-semibold">Your Progress</h3>
+                <div class="mt-4">
+                    <div class="bg-gray-200 rounded-full h-4">
+                        <div class="bg-blue-500 h-4 rounded-full" style="width: 60%;"></div>
+                    </div>
+                    <p class="mt-2 text-gray-600">60% completed</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded shadow">
+                <h3 class="text-xl font-semibold">Quick Links</h3>
+                <a href="pronunciation.html" class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded">Practice Pronunciation</a>
+                <a href="conversation.html" class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded">Start Conversation</a>
+                <a href="vocabulary.html" class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded">Build Vocabulary</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

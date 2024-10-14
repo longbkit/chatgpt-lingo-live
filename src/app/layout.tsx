@@ -1,35 +1,30 @@
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import '../styles/globals.css'
+import Navigation from '../components/Navigation'
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "ChatGPT Lingo Live",
-  description: "ChatGPT Lingo Live",
-};
+  title: 'ChatGPT Lingo Live',
+  description: 'Learn languages with AI',
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={inter.className}>
+        <div className="flex flex-col min-h-screen">
+          <main className="flex-grow pb-16">
+            {children}
+          </main>
+          <Navigation />
+        </div>
       </body>
     </html>
-  );
+  )
 }

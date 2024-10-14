@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>AI Conversation Practice</title>
+    <style>
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .tooltip:hover {
+            background-color: #f0f0f0;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 150px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -75px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
+    <script>
+        function startVoiceRecognition() {
+            alert('Voice recognition started');
+        }
+
+        function addToLearned(word) {
+            alert(`Word "${word}" added to learned vocabulary!`);
+        }
+
+        function markForReview(word) {
+            alert(`Word "${word}" marked for review!`);
+        }
+
+        function showTranslation(word) {
+            alert(`Translation for ${word}: Hello`);
+        }
+
+        function showVocabBuilder(word) {
+            document.getElementById('vocab-builder').style.display = 'block';
+            document.getElementById('vocab-word').innerText = word;
+            // Example data for demonstration
+            document.getElementById('usage-frequency').innerText = 'High';
+            document.getElementById('difficulty-level').innerText = 'Easy';
+            document.getElementById('example-sentence').innerText = '你好吗？我很好。';
+            document.getElementById('category').innerText = 'Greetings';
+            document.getElementById('progress').innerText = '80%';
+            document.getElementById('subcategories').innerText = 'Basic Phrases';
+            document.getElementById('tags').innerText = 'Common, Polite';
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="landing.html" class="text-xl font-bold text-gray-800">LanguageApp</a>
+            <div>
+                <a href="dashboard.html" class="text-gray-600 hover:text-blue-500 mx-2">Dashboard</a>
+                <a href="conversation.html" class="text-gray-600 hover:text-blue-500 mx-2">Conversation</a>
+                <a href="catalog.html" class="text-gray-600 hover:text-blue-500 mx-2">Courses</a>
+                <a href="profile.html" class="text-gray-600 hover:text-blue-500 mx-2">Profile</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-semibold text-center">AI Conversation Practice</h2>
+        <div class="mt-8 bg-white p-6 rounded shadow">
+            <div class="chat-box">
+                <div class="chat-message">
+                    <p class="text-gray-700"><strong>AI:</strong> 
+                        <span class="tooltip" onclick="showVocabBuilder('你好吗')">你好吗<span class="tooltiptext">How are you?</span></span>, 
+                        <span class="tooltip" onclick="showVocabBuilder('今天')">今天<span class="tooltiptext">today</span></span> 
+                        <span class="tooltip" onclick="showVocabBuilder('天气')">天气<span class="tooltiptext">weather</span></span> 
+                        <span class="tooltip" onclick="showVocabBuilder('怎么样')">怎么样<span class="tooltiptext">how is it</span></span>?
+                    </p>
+                </div>
+                <div class="chat-message">
+                    <p class="text-gray-700"><strong>User:</strong> 我很好，谢谢！</p>
+                </div>
+                <div class="chat-message">
+                    <p class="text-gray-700"><strong>AI:</strong> 很高兴听到你很好。你今天有什么计划吗？</p>
+                </div>
+                <div class="suggested-answers mt-4">
+                    <p class="text-gray-600">Suggested Answers:</p>
+                    <button class="mt-2 bg-gray-200 text-gray-700 px-3 py-1 rounded">我很好，谢谢！</button>
+                    <button class="mt-2 bg-gray-200 text-gray-700 px-3 py-1 rounded">还不错，你呢？</button>
+                </div>
+                <div class="chat-input mt-4">
+                    <input type="text" class="w-full px-3 py-2 border rounded" placeholder="Type your response...">
+                    <button class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Send</button>
+                    <button class="mt-2 bg-green-500 text-white px-4 py-2 rounded" onclick="startVoiceRecognition()">🎤 Voice</button>
+                </div>
+            </div>
+        </div>
+        <div id="vocab-builder" class="mt-8 bg-white p-6 rounded shadow" style="display: none;">
+            <h3 class="text-xl font-semibold">Vocabulary Builder</h3>
+            <p class="mt-2 text-gray-600">Word: <span id="vocab-word" class="font-bold"></span></p>
+            <p class="mt-2 text-gray-600">Category: <span id="category" class="font-bold"></span></p>
+            <p class="mt-2 text-gray-600">Progress: <span id="progress" class="font-bold"></span></p>
+            <p class="mt-2 text-gray-600">Subcategories: <span id="subcategories" class="font-bold"></span></p>
+            <p class="mt-2 text-gray-600">Tags: <span id="tags" class="font-bold"></span></p>
+            <p class="mt-2 text-gray-600">Usage Frequency: <span id="usage-frequency" class="font-bold"></span></p>
+            <p class="mt-2 text-gray-600">Difficulty Level: <span id="difficulty-level" class="font-bold"></span></p>
+            <p class="mt-2 text-gray-600">Example Sentence: <span id="example-sentence" class="font-bold"></span></p>
+            <button class="mt-4 bg-green-500 text-white px-4 py-2 rounded" onclick="addToLearned(document.getElementById('vocab-word').innerText)">Add to Learned</button>
+            <button class="mt-4 bg-yellow-500 text-white px-4 py-2 rounded" onclick="markForReview(document.getElementById('vocab-word').innerText)">Mark for Review</button>
+            <button class="mt-4 bg-blue-500 text-white px-4 py-2 rounded" onclick="showTranslation(document.getElementById('vocab-word').innerText)">Show Translation</button>
+        </div>
+    </div>
+</body>
+</html>
