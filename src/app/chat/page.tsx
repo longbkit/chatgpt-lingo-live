@@ -174,16 +174,16 @@ const ChatPage: React.FC = () => {
     if (!input.trim()) return;
     
     // Here you would typically send the message to your API
-    // For now, we'll just clear the input and fetch messages
+    // For now, we&apos;ll just clear the input and fetch messages
     setInput('');
     fetchMessages();
     
     // Generate suggestions based on the input
-    // This is a placeholder. In a real app, you'd generate these based on the AI's response
+    // This is a placeholder. In a real app, you&apos;d generate these based on the AI&apos;s response
     const newSuggestions = [
       "Tell me more about that",
       "Can you explain it differently?",
-      "What's next?",
+      "What&apos;s next?",
     ];
     setSuggestions(newSuggestions);
   };
