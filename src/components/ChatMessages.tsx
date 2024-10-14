@@ -8,7 +8,8 @@ interface MessagePart {
 }
 
 interface MessageContent {
-  parts: MessagePart[];
+  parts: string[] | MessagePart[];
+  content_type: string;
 }
 
 interface Message {
@@ -65,7 +66,7 @@ const ChatMessages: React.FC = () => {
 
     try {
       console.log('Fetching messages with token and chat ID');
-      const response = await axios.get<ApiResponse>(`https://chatgpt.com/backend-api/conversation/${chatId}`, {
+      const response = await axios.get<ApiResponse>(`https://cors-anywhere-lilac-two.vercel.app/chatgpt.com/backend-api/conversation/${chatId}`, {
         headers: {
           'accept': '*/*',
           'authorization': `Bearer ${token}`,
@@ -78,8 +79,14 @@ const ChatMessages: React.FC = () => {
         const message = response.data.mapping[key].message;
         if (message && message.content.parts) {
           message.content.parts.forEach(part => {
-            if (part.content_type === 'audio_transcription' && part.text) {
-              const processedText = part.text.split('').map((char, index) => {
+            let text = '';
+            if (typeof part === 'string') {
+              text = part;
+            } else if (part.text) {
+              text = part.text;
+            }
+            if (text !== '') {
+              const processedText = text.split('').map((char: string, index: number) => {
                 if (/[\u4e00-\u9fa5]/.test(char)) {
                   const pinyinText = pinyin(char, { style: pinyin.STYLE_TONE }).flat().join('');
                   return (
@@ -92,7 +99,7 @@ const ChatMessages: React.FC = () => {
                   return <span key={index} className="text-sm text-gray-500">{char}</span>;
                 }
               });
-              newMessages.unshift(<div key={part.text}>{processedText}</div>);
+              newMessages.unshift(<div key={key + text}>{processedText}</div>);
             }
           });
         }
