@@ -152,7 +152,7 @@ const ChatMessages: React.FC = () => {
             }}
             className=" py-2 px-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition duration-300 mr-4"
           >
-            Refresh Now
+            Refresh
           </button>
           <button
             onClick={stopTimer}
