@@ -275,7 +275,7 @@ const ChatPage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] border-2 border-gray-200 p-2 rounded-lg mt-4 pt-2">
-      <div ref={scrollContainerRef} className="relative flex-grow overflow-y-auto  pb-36 rounded-lg" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div ref={scrollContainerRef} className="flex-grow overflow-y-auto rounded-lg" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         <div className="fixed top-2">
           <div className="bg-gray-200 p-2 rounded-lg w-fit bg-opacity-50">
               <Button
@@ -299,12 +299,12 @@ const ChatPage: React.FC = () => {
           {error && <p className="text-red-500 mb-6 text-xl">{error}</p>}
       </div>
       </div>
-        <div className="space-y-4">
-          <div ref={messagesStartRef} className="rounded-lg"/>
-          {messages}
-          <div ref={messagesEndRef} />
-        </div>
-        
+      <div className="space-y-4  pb-36 ">
+        <div ref={messagesStartRef} className="rounded-lg"/>
+        {messages}
+        <div ref={messagesEndRef} />
+      </div>
+      
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-50 mb-14">
         {suggestions.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-2">
