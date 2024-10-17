@@ -83,8 +83,8 @@ const ChatPage: React.FC = () => {
    
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-  
-      setShowGoToTop(scrollTop > 100);
+      console.log('scrollTop', scrollTop, scrollHeight, clientHeight);
+      setShowGoToTop(scrollTop > 200);
       setShowGoToBottom(scrollTop + clientHeight < scrollHeight - 100);
     };
   
@@ -297,14 +297,14 @@ const ChatPage: React.FC = () => {
           </div>
 
           {error && <p className="text-red-500 mb-6 text-xl">{error}</p>}
+        </div>
+        <div className="space-y-4  pb-36 ">
+          <div ref={messagesStartRef} className="rounded-lg"/>
+          {messages}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
-      </div>
-      <div className="space-y-4  pb-36 ">
-        <div ref={messagesStartRef} className="rounded-lg"/>
-        {messages}
-        <div ref={messagesEndRef} />
-      </div>
-      
+     
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-50 mb-14">
         {suggestions.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-2">
