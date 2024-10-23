@@ -47,7 +47,7 @@ const processMessages = (data: any): Record<string, Message> => {
         message.author.role !== 'tool' && 
         message.content.content_type !== 'code' && 
         message.content.content_type !== 'execution_output' && 
-        ((Array.isArray(message.content.parts) && message.content.parts.some(part => 
+        ((Array.isArray(message.content.parts) && message.content.parts.some((part: string | MessagePart) => 
           typeof part === 'string' ? part.trim() !== '' : 
           (typeof part === 'object' && part.content_type !== 'real_time_user_audio_video_asset_pointer' && part.text?.trim() !== '')
         )) ||
@@ -60,7 +60,7 @@ const processMessages = (data: any): Record<string, Message> => {
 
 const getMessageTextContent = (message: Message): string => {
   if (Array.isArray(message.content.parts)) {
-    return message.content.parts.map(part => 
+    return message.content.parts.map((part: string | MessagePart) => 
       typeof part === 'string' ? part : part?.text
     ).join(' ');
   }
