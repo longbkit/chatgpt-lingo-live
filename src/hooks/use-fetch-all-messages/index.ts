@@ -35,7 +35,7 @@ export interface Mapping {
 export interface ApiResponse {
   mapping: Mapping;
 }
-const processMessages = (data: ApiResponse): Record<string, Message> => {
+const processMessages = (data: any): Record<string, Message> => {
   const messages: Record<string, Message> = {};
   if (!data.mapping) {
     return messages;
