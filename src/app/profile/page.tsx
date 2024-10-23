@@ -19,10 +19,10 @@ export default function ProfilePage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('apiToken') || '';
-      const storedChatId = localStorage.getItem('chatId') || '';
-      const storedUsername = localStorage.getItem('username') || '';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const storedToken = window.localStorage.getItem('apiToken') || '';
+      const storedChatId = window.localStorage.getItem('chatId') || '';
+      const storedUsername = window.localStorage.getItem('username') || '';
       setToken(storedToken);
       setChatId(storedChatId);
       setUsername(storedUsername);
