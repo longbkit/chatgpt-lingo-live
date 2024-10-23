@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
 import { getConversation } from "../../apis/chatgpt-direct";
 // import { v4 as uuidv4 } from 'uuid';
@@ -69,16 +67,7 @@ const getMessageTextContent = (message: Message): string => {
 
 export const useGetAllMessages = () => {
   const [lastMessage, setLastMessage] = useState<Message | null>(null);
-  const [messages, setMessages] = useState<Record<string, Message>>(() => {
-    const savedMessages = localStorage.getItem('chatMessages');
-    const parsedMessages: Record<string, Message> = savedMessages ? JSON.parse(savedMessages) : {};
-    const lastMessage = Object.values(parsedMessages).pop();
-    console.log('loading last message', lastMessage);
-    if (lastMessage && lastMessage.author.role === 'assistant') {
-      setLastMessage(lastMessage);
-    }
-    return parsedMessages;
-  });
+  const [messages, setMessages] = useState<Record<string, Message>>({});
   const isLoadingRef = useRef(false);
   const [error, setError] = useState<any>(null);
   const lastProcessedMessageIdRef = useRef<string | null>(null);
@@ -86,6 +75,16 @@ export const useGetAllMessages = () => {
   const saveMessagesToLocalStorage = (messages: Record<string, Message>) => {
     localStorage.setItem('chatMessages', JSON.stringify(messages));
   };
+
+  useEffect(() => {
+    const savedMessages = localStorage.getItem('chatMessages');
+    const parsedMessages: Record<string, Message> = savedMessages ? JSON.parse(savedMessages) : {};
+    const lastMessage = Object.values(parsedMessages).pop();
+    if (lastMessage && lastMessage.author.role === 'assistant') {
+      setLastMessage(lastMessage);
+    }
+    setMessages(parsedMessages);
+  }, []);
 
   const fetchMessages = async (chatId: string) => {
     if (isLoadingRef.current) {
