@@ -4,11 +4,19 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getAllConversations } from '@/apis/chatgpt-direct';
+
+interface Conversation {
+  id: string;
+  title: string;
+}
 
 export default function ProfilePage() {
   const [token, setToken] = useState<string>('');
   const [chatId, setChatId] = useState<string>('');
   const [username, setUsername] = useState<string>('');
+  const [conversations, setConversations] = useState<Conversation[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -18,8 +26,21 @@ export default function ProfilePage() {
       setToken(storedToken);
       setChatId(storedChatId);
       setUsername(storedUsername);
+
+      if (storedToken) {
+        fetchConversations(storedToken);
+      }
     }
   }, []);
+
+  const fetchConversations = async (token: string) => {
+    try {
+      const response = await getAllConversations();
+      setConversations(response.items);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    }
+  };
 
   const handleSaveProfile = () => {
     if (typeof window !== 'undefined') {
@@ -28,6 +49,16 @@ export default function ProfilePage() {
       localStorage.setItem('username', username);
     }
     console.log('Profile saved');
+  };
+
+  const handleTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newToken = e.target.value;
+    setToken(newToken);
+    if (newToken) {
+      fetchConversations(newToken);
+    } else {
+      setConversations([]);
+    }
   };
 
   return (
@@ -63,16 +94,34 @@ export default function ProfilePage() {
               <Input
                 type="text"
                 value={token}
-                onChange={(e) => setToken(e.target.value)}
+                onChange={handleTokenChange}
                 placeholder="Enter API Token"
               />
-              <Input
-                type="text"
-                value={chatId}
-                onChange={(e) => setChatId(e.target.value)}
-                placeholder="Enter Chat ID"
-              />
+              <Select value={chatId} onValueChange={setChatId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a conversation" />
+                </SelectTrigger>
+                <SelectContent>
+                  {conversations.map((conversation) => (
+                    <SelectItem key={conversation.id} value={conversation.id}>
+                      {conversation.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Button onClick={handleSaveProfile}>Save Settings</Button>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Clear Chat Messages</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Button onClick={() => localStorage.removeItem('chatMessages')}>
+                Clear Chat Messages
+              </Button>
             </div>
           </CardContent>
         </Card>
