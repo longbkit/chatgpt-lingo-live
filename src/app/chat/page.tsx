@@ -225,7 +225,7 @@ const ChatPage: React.FC = () => {
                   >
                     <Button
                       variant="outline"
-                      size="x-lg"
+                      size="xl"
                       onClick={() => setInput(idea.chinese)}
                       className="w-full text-left overflow-hidden text-ellipsis p-2"
                     >
