@@ -12,7 +12,7 @@ export const getConversation = async (chatId: string) => {
       'Authorization': `Bearer ${storedToken}`
     }
   });
-  return response.data;
+  return response;
 };
 
 export const getAllConversations = async (offset: number = 0, limit: number = 28, order: string = 'updated') => {

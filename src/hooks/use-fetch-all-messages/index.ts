@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { getConversation } from "../../apis/chatgpt-direct";
 // import { v4 as uuidv4 } from 'uuid';

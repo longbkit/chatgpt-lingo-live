@@ -66,10 +66,10 @@ const ChatPage: React.FC = () => {
 
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const storedToken = window.localStorage.getItem('apiToken') || '';
-      const storedChatId = window.localStorage.getItem('chatId') || '';
-      const storedMessages = JSON.parse(window.localStorage.getItem('chatMessages') || '[]');
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('apiToken') || '';
+      const storedChatId = localStorage.getItem('chatId') || '';
+      const storedMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
 
       setToken(storedToken);
       setChatId(storedChatId);    
