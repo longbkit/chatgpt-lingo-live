@@ -53,7 +53,7 @@ export const getLanguageHelper = async (textContent: string) => {
   1. Words: Extract key Chinese words.
   2. Phrases: Identify meaningful and common phrases (not full sentences).
   3. Sentences: Select complete sentences from the text.
-  4. Ideas: Suggest continuation ideas in three categories:
+  4. Ideas: Suggest user with answer ideas in three categories:
      - Standard: 1-2 straightforward follow-ups
      - Open: 1-2 thought-provoking questions or topics
      - Creative: 1-2 unique or unexpected directions

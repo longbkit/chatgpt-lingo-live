@@ -3,6 +3,7 @@ import { getConversation } from "../../apis/chatgpt-direct";
 // import { v4 as uuidv4 } from 'uuid';
 // import { getLanguageHelper } from "./get-language-helper";
 import { getLanguageHelperManual as getLanguageHelper } from "./get-language-helper-manual";
+import { getLearnedDictionaries } from "../../apis/language-backend";
 
 export interface MessagePart {
   content_type: string;
@@ -19,6 +20,7 @@ export interface Message {
   id: string;
   content: MessageContent;
   language_helper?: any;
+  learning_helper?: any;
   author: {
     role: string;
   };
@@ -33,6 +35,8 @@ export interface Mapping {
 export interface ApiResponse {
   mapping: Mapping;
 }
+
+const profileId = 'fa307f6f-953c-4354-aac6-845911381506';
 
 const processMessages = (data: ApiResponse): Record<string, Message> => {
   const messages: Record<string, Message> = {};
@@ -97,14 +101,8 @@ export const useGetAllMessages = () => {
     try {
       const response = await getConversation(chatId);
       const newMessages = processMessages(response);
-      console.log('response', response);
       setMessages((prevMessages) => {
         const mergedMessages = {...prevMessages};
-        // Get the last message from newMessages
-        // const lastMessageFromNew = Object.values(newMessages).pop();
-        // if (lastMessageFromNew && lastMessageFromNew.author.role === 'assistant') {
-        //   lastAssistantMessage = lastMessageFromNew;
-        // }
         Object.values(newMessages).forEach((newMessage) => {
           if (!mergedMessages[newMessage.id]) {
             mergedMessages[newMessage.id] = newMessage;
@@ -146,6 +144,34 @@ export const useGetAllMessages = () => {
       isLoadingRef.current = false;
     }
   };
+
+  useEffect(() => {
+    const fetchLearningHelper = async () => {
+      if (lastMessage && lastMessage.language_helper?.words && !lastMessage.learning_helper) {
+        const words = lastMessage.language_helper.words.map((word: any) => word.chinese);
+        const learnedDictionaries = await getLearnedDictionaries(profileId, words);
+        console.log('learnedDictionaries', learnedDictionaries);
+        lastMessage['learning_helper'] = learnedDictionaries;
+        lastMessage.language_helper.words = lastMessage.language_helper.words.map((word: any) => {
+          const learnedDictionary = learnedDictionaries.find((learnedDictionary: any) => learnedDictionary.dictionary.text === word.chinese);
+          return {
+            ...word,
+            learned_dictionary: learnedDictionary
+          };
+        });
+        setMessages(prevMessages => {
+          const updatedMessages = {
+            ...prevMessages,
+            [lastMessage.id]: lastMessage
+          };
+          return updatedMessages;
+        });
+      }
+    }
+
+    fetchLearningHelper();
+
+  }, [lastMessage]);
 
   return { messages, isLoading: isLoadingRef.current, error, fetchMessages, setMessages, lastMessage, setLastMessage };
 };

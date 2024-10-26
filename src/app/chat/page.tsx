@@ -181,7 +181,7 @@ const ChatPage: React.FC = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] border-2 border-gray-200 p-2 rounded-lg mt-4 pt-2">
       <div ref={scrollContainerRef} className="flex-grow overflow-y-auto rounded-lg" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        <div className="fixed top-2">
+        <div className="fixed top-2 z-50">
           <div className="bg-gray-200 p-2 rounded-lg w-fit bg-opacity-50">
               <Button
                 onClick={() => {
@@ -206,7 +206,7 @@ const ChatPage: React.FC = () => {
         <div className="space-y-4  pb-36 ">
           <div ref={messagesStartRef} className="rounded-lg"/>
           {Object.values(messages || {}).map((message: Message, index: number) => (
-            <MessageRenderer key={message.id} message={message} isLastMessage={lastMessage?.id === message.id} />
+            <MessageRenderer key={message.id} message={message} isLastMessage={lastMessage?.id === message.id} setMessages={setMessages}/>
           ))}
           {/* {lastMessage && <MessageRenderer key={lastMessage.id} message={lastMessage} />} */}
           <div ref={messagesEndRef} />
@@ -216,7 +216,7 @@ const ChatPage: React.FC = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-50 mb-14">
         {lastMessage?.language_helper?.ideas && (
           <div className="mb-4 overflow-x-auto">
-            <div className="pl-16 flex gap-2">
+            <div className="px-16 flex gap-2">
               {['standard', 'open', 'creative'].map((category: string) => (
                 lastMessage.language_helper.ideas[category].map((idea: any, index: number) => (
                   <div
