@@ -2,7 +2,7 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateDictionaryDto, UpdateLearnedDictionaryDto, UpdateLearningProfileDto } from './generated/nestjs-dto';
 
-const API_DIRECT_URL = process.env.LANGUAGE_API_URL || 'http://localhost:3000';
+const API_DIRECT_URL = process.env.NEXT_PUBLIC_LANGUAGE_API_URL || 'http://localhost:3000';
 // const API_DIRECT_URL = 'http://localhost:8080/https://chatgpt.com/backend-api';
 
 export const createDictionary = async (dictionary: CreateDictionaryDto) => {
