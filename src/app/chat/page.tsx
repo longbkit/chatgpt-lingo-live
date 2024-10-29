@@ -1,92 +1,58 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import pinyin from 'pinyin';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bot } from 'lucide-react';
-import { User } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { useGetAllMessages } from '@/hooks/use-fetch-all-messages/index';
 import MessageRenderer from './message-renderer';
-import useSendMessageSSE from '@/hooks/use-send-message-chatgpt';
 import { chatModel } from "@/lib/langchain-setup";
-import { HumanMessage } from '@langchain/core/messages';
 // import { loadSentinelAndGetTokens } from '@/apis/chatgpt-direct';
 // import { getChatRequirements } from '@/apis/chatgpt-direct';
 // import { RDe } from '@/apis/sentinel';
 import { v4 as uuidv4 } from 'uuid';
-interface MessagePart {
-  content_type: string;
-  text?: string;
-}
+import { SettingsPanel } from './settings-panel';
+import { useSettings } from '@/hooks/use-settings';
+import { Message } from '@/hooks/use-fetch-all-messages';
 
-interface MessageContent {
-  parts: string[] | MessagePart[];
-  content_type: string;
-  text?: string;
-}
-
-interface Message {
-  id: string;
-  content: MessageContent;
-  author: {
-    role: string;
-  };
-}
-
-interface Mapping {
-  [key: string]: {
-    message: Message | null;
-  };
-}
-
-interface ApiResponse {
-  mapping: Mapping;
-}
 
 const ChatPage: React.FC = () => {
-  const { messages, isLoading, error, fetchMessages, setMessages, lastMessage } = useGetAllMessages();
-  const [countdown, setCountdown] = useState<number>(5);
-  const [isTimerActive, setIsTimerActive] = useState<boolean>(true);
+  const { messages, isLoading, error, fetchMessages, updateMessages, updateSingleMessage, lastMessage, fetchLanguageHelper } = useGetAllMessages();
   const [token, setToken] = useState<string>('');
   const [chatId, setChatId] = useState<string>('');
   const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showGoToTop, setShowGoToTop] = useState<boolean>(false);
-  const [showGoToBottom, setShowGoToBottom] = useState<boolean>(true);
-  const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
-  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [showGoToBottom, setShowGoToBottom] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesStartRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
+  const {
+    refreshInterval,
+    setRefreshInterval,
+    autoScroll,
+    setAutoScroll,
+    autoExpandSentences,
+    setAutoExpandSentences,
+    autoExpandWords,
+    setAutoExpandWords,
+    autoExpandPhrases,
+    setAutoExpandPhrases,
+    autoCollapsePrevious,
+    setAutoCollapsePrevious
+  } = useSettings();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('apiToken') || '';
       const storedChatId = localStorage.getItem('chatId') || '';
-      const storedMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
+      //const storedMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
 
       setToken(storedToken);
       setChatId(storedChatId);    
-      setMessages(storedMessages);
+      //updateMessages(storedMessages);
     }
   }, []);
-
-  useEffect(() => {
-    if (token && chatId) {
-      fetchMessages(chatId);
-      startTimer();
-
-      return () => {
-        stopTimer();
-      };
-    }
-  }, [token, chatId]);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -104,34 +70,15 @@ const ChatPage: React.FC = () => {
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, []);
 
-  
+
   useEffect(() => {
     // scroll to bottom if the user is already scrolled to the bottom
-    if (!showGoToBottom && messagesEndRef.current) {
+    if (autoScroll && !showGoToBottom && messagesEndRef.current) {
       scrollToBottom();
     }
   }, [messages]);
 
-
-  const startTimer = () => {
-    setIsTimerActive(true);
-    intervalIdRef.current = setInterval(() => {
-      fetchMessages(chatId);
-      setCountdown(5);
-
-    }, 5000);
-
-    countdownIntervalRef.current = setInterval(() => {
-      setCountdown(prev => (prev > 0 ? prev - 1 : 5));
-    }, 1000);
-  };
-
-  const stopTimer = () => {
-    setIsTimerActive(false);
-    if (intervalIdRef.current) clearInterval(intervalIdRef.current);
-    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-  };
-
+  
   const sendMessage = async () => {
     if (!input.trim()) return;
     
@@ -140,25 +87,29 @@ const ChatPage: React.FC = () => {
    
     // const userMessage = new HumanMessage(input);
     const response = await chatModel.invoke(input);
-    console.log('response', response);
 
     setInput('');
     const userId = uuidv4();
     const assistantId = uuidv4();
     // Update messages with the new message
-    setMessages((prevMessages: any) => ({
-      ...prevMessages,
+    const userCreateTime = Date.now();
+    const assistantCreateTime = Date.now();
+    const newMessages : any = {
+      ...messages,
       [userId]: {
         id: userId, // Temporary ID
         content: { content_type: 'text', parts: [input] },
-        author: { role: 'user' }
+        author: { role: 'user' },
+        create_time: userCreateTime
       },
       [assistantId]: {
         id: assistantId, // Temporary ID
         content: { content_type: 'text', parts: [response?.content] },
-        author: { role: 'assistant' }
+        author: { role: 'assistant' },
+        create_time: assistantCreateTime
       }
-    }));
+    };
+    updateMessages(newMessages);
     
     // Generate suggestions based on the input
     // This is a placeholder. In a real app, you'd generate these based on the AI's response
@@ -178,35 +129,37 @@ const ChatPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+
+
+  console.log('rendering');
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] border-2 border-gray-200 p-2 rounded-lg mt-4 pt-2">
       <div ref={scrollContainerRef} className="flex-grow overflow-y-auto rounded-lg" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        <div className="fixed top-2 z-50">
-          <div className="bg-gray-200 p-2 rounded-lg w-fit bg-opacity-50">
-              <Button
-                onClick={() => {
-                  fetchMessages(chatId);
-                  stopTimer();
-                  startTimer();
-                }}
-                className="mr-4"
-              >
-                { isTimerActive ? `Refresh in: ${countdown}s` : 'Refresh' } 
-              </Button>
-              { isTimerActive && <Button
-                onClick={stopTimer}
-                variant="outline"
-              >
-                Stop
-              </Button> }
-          </div>
-
+        <div className="fixed w-full top-2 z-50">
+          <SettingsPanel
+            refreshInterval={refreshInterval}
+            setRefreshInterval={setRefreshInterval}
+            autoScroll={autoScroll}
+            setAutoScroll={setAutoScroll}
+            autoExpandSentences={autoExpandSentences}
+            setAutoExpandSentences={setAutoExpandSentences}
+            autoExpandWords={autoExpandWords}
+            setAutoExpandWords={setAutoExpandWords}
+            autoExpandPhrases={autoExpandPhrases}
+            setAutoExpandPhrases={setAutoExpandPhrases}
+            autoCollapsePrevious={autoCollapsePrevious}
+            setAutoCollapsePrevious={setAutoCollapsePrevious}
+            fetchMessages={fetchMessages}
+            error={error}
+          />
           {error && <p className="text-red-500 mb-6 text-xl">{error.message || 'Error fetching messages'}</p>}
         </div>
         <div className="space-y-4  pb-36 ">
           <div ref={messagesStartRef} className="rounded-lg"/>
           {Object.values(messages || {}).map((message: Message, index: number) => (
-            <MessageRenderer key={message.id} message={message} isLastMessage={lastMessage?.id === message.id} setMessages={setMessages}/>
+            <MessageRenderer key={message.id} message={message} fetchLanguageHelper={fetchLanguageHelper} isLastMessage={lastMessage?.id === message.id} 
+            updateMessages={updateMessages} updateSingleMessage={updateSingleMessage} autoCollapsePrevious={autoCollapsePrevious} autoExpandSentences={autoExpandSentences}
+            autoExpandWords={autoExpandWords} autoExpandPhrases={autoExpandPhrases}/>
           ))}
           {/* {lastMessage && <MessageRenderer key={lastMessage.id} message={lastMessage} />} */}
           <div ref={messagesEndRef} />
@@ -247,6 +200,8 @@ const ChatPage: React.FC = () => {
                   </div>
                 ))
               ))}
+            <div className="ml-16 whitespace-pre-wrap">&nbsp;</div>
+
             </div>
           </div>
         )}

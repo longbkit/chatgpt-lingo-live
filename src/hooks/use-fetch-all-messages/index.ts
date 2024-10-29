@@ -19,8 +19,8 @@ export interface MessageContent {
 export interface Message {
   id: string;
   content: MessageContent;
+  create_time: number;
   language_helper?: any;
-  learning_helper?: any;
   author: {
     role: string;
   };
@@ -78,100 +78,148 @@ export const useGetAllMessages = () => {
   const lastProcessedMessageIdRef = useRef<string | null>(null);
 
   const saveMessagesToLocalStorage = (messages: Record<string, Message>) => {
+    console.log('saveMessagesToLocalStorage', messages);
     localStorage.setItem('chatMessages', JSON.stringify(messages));
   };
 
-  useEffect(() => {
-    const savedMessages = localStorage.getItem('chatMessages');
-    const parsedMessages: Record<string, Message> = savedMessages ? JSON.parse(savedMessages) : {};
-    const lastMessage = Object.values(parsedMessages).pop();
-    if (lastMessage && lastMessage.author.role === 'assistant') {
-      setLastMessage(lastMessage);
-    }
-    setMessages(parsedMessages);
-  }, []);
+  // useEffect(() => {
+  //   const savedMessages = localStorage.getItem('chatMessages');
+  //   const parsedMessages: Record<string, Message> = savedMessages ? JSON.parse(savedMessages) : {};
 
-  const fetchMessages = async (chatId: string) => {
+  //   updateMessages(parsedMessages);
+  // }, []);
+
+  // useEffect(() => {
+  //   if (messages) {
+  //     saveMessagesToLocalStorage(messages);
+  //   }
+  // }, [messages]);
+
+  const updateSingleMessage = (message: Message) => {
+    const newMessages : Record<string, Message> = {
+      ...messages,
+      [message.id]: message
+    }
+    updateMessages(newMessages);
+  }
+
+  const updateMessages = (newMessages: Record<string, Message>) => {
+    // sort
+    const sorted = Object.values(newMessages).sort((a: Message, b: Message) => a.create_time - b.create_time);const sortedMessages = sorted.reduce((acc: Record<string, Message>, message: Message) => {
+      acc[message.id] = message;
+      return acc;
+    }, {});
+    // save to local storage
+    saveMessagesToLocalStorage(sortedMessages);
+    // set messages
+    setMessages((_) => sortedMessages);
+
+    const lastNewMessage = sorted.pop();
+    if (lastNewMessage &&
+      lastNewMessage?.author.role === 'assistant' && 
+        lastNewMessage.id !== lastProcessedMessageIdRef.current
+      && lastNewMessage.id !== lastMessage?.id) {
+      console.log('Setting last message', lastNewMessage, lastMessage, lastProcessedMessageIdRef.current);
+      lastProcessedMessageIdRef.current = lastNewMessage.id;
+      
+      setLastMessage(lastNewMessage);
+    }
+  }
+
+  const fetchMessages = async (chatId: string) : Promise<any> => {
     if (isLoadingRef.current) {
       console.log("Already loading, skipping this call");
-      return;
+      return [];
     }
 
     isLoadingRef.current = true;
     try {
       const response = await getConversation(chatId);
       const newMessages = processMessages(response);
-      setMessages((prevMessages) => {
-        const mergedMessages = {...prevMessages};
-        Object.values(newMessages).forEach((newMessage) => {
-          if (!mergedMessages[newMessage.id]) {
-            mergedMessages[newMessage.id] = newMessage;
+      if (!messages.id) {
+        const savedMessages = localStorage.getItem('chatMessages');
+        const parsedMessages: Record<string, Message> = savedMessages ? JSON.parse(savedMessages) : {};
+        console.log('messages is not initialized, loading from local storage', parsedMessages);
+        const mergedMessages = { ...parsedMessages };
+        for (const key in newMessages) {
+          if (mergedMessages[key]) {
+            mergedMessages[key] = { ...mergedMessages[key], ...newMessages[key] };
+          } else {
+            mergedMessages[key] = newMessages[key];
           }
-          return mergedMessages;
-        });
- 
-        return mergedMessages;
-      })
-
-      const lastNewMessage = Object.values(newMessages).pop();
-      if (lastNewMessage && !messages[lastNewMessage.id] &&
-        lastNewMessage?.author.role === 'assistant' && 
-          (lastNewMessage.id !== lastProcessedMessageIdRef.current)) {
-        console.log('Setting last message', lastNewMessage.id, lastMessage?.id, lastNewMessage, lastMessage);
-        lastProcessedMessageIdRef.current = lastNewMessage.id;
-        
-        if (!lastNewMessage.language_helper) {
-          const textContent = getMessageTextContent(lastNewMessage);
-          const languageHelper = await getLanguageHelper(textContent);
-          lastNewMessage['language_helper'] = languageHelper;
-          
-          setMessages(prevMessages => {
-            const updatedMessages = {
-              ...prevMessages,
-              [lastNewMessage.id]: lastNewMessage
-            };
-            saveMessagesToLocalStorage(updatedMessages);
-            return updatedMessages;
-          });
         }
-
-        setLastMessage(lastNewMessage);
+        updateMessages(mergedMessages);
+      } else {
+        const mergedMessages = { ...messages };
+        for (const key in newMessages) {
+          if (mergedMessages[key]) {
+            mergedMessages[key] = { ...mergedMessages[key], ...newMessages[key] };
+          } else {
+            mergedMessages[key] = newMessages[key];
+          }
+        }
+        console.log('messages is initialized, merging with new messages', newMessages);
+        updateMessages(mergedMessages);
       }
-      
     } catch (error: any) {
       setError(error);
     } finally {
       isLoadingRef.current = false;
     }
+
+    return [];
   };
 
-  useEffect(() => {
-    const fetchLearningHelper = async () => {
-      if (lastMessage && lastMessage.language_helper?.words && !lastMessage.learning_helper) {
-        const words = lastMessage.language_helper.words.map((word: any) => word.chinese);
+  const fetchLanguageHelper = async (message: Message) => {
+    console.log('fetchLanguageHelper', message);
+    const textContent = getMessageTextContent(message);
+    const languageHelper = await getLanguageHelper(textContent);
+    // const languageHelper : any = {};
+    if (languageHelper) {
+      console.log('languageHelper', languageHelper);
+      if (languageHelper.words) {
+        const words = languageHelper.words.map((word: any) => word.chinese);
         const learnedDictionaries = await getLearnedDictionaries(profileId, words);
-        console.log('learnedDictionaries', learnedDictionaries);
-        lastMessage['learning_helper'] = learnedDictionaries;
-        lastMessage.language_helper.words = lastMessage.language_helper.words.map((word: any) => {
+        languageHelper.words = languageHelper.words.map((word: any) => {
           const learnedDictionary = learnedDictionaries.find((learnedDictionary: any) => learnedDictionary.dictionary.text === word.chinese);
           return {
             ...word,
             learned_dictionary: learnedDictionary
           };
         });
-        setMessages(prevMessages => {
-          const updatedMessages = {
-            ...prevMessages,
-            [lastMessage.id]: lastMessage
-          };
-          return updatedMessages;
-        });
       }
+      message['language_helper'] = languageHelper;
+      updateSingleMessage(message);
     }
+  }
 
-    fetchLearningHelper();
+  // useEffect(() => {
+  //   const fetchLearningHelper = async () => {
+  //     if (lastMessage && lastMessage.language_helper?.words && !lastMessage.learning_helper) {
+  //       const words = lastMessage.language_helper.words.map((word: any) => word.chinese);
+  //       const learnedDictionaries = await getLearnedDictionaries(profileId, words);
+  //       console.log('learnedDictionaries', learnedDictionaries);
+  //       // lastMessage['learning_helper'] = learnedDictionaries;
+  //       lastMessage.language_helper.words = lastMessage.language_helper.words.map((word: any) => {
+  //         const learnedDictionary = learnedDictionaries.find((learnedDictionary: any) => learnedDictionary.dictionary.text === word.chinese);
+  //         return {
+  //           ...word,
+  //           learned_dictionary: learnedDictionary
+  //         };
+  //       });
+  //       setMessages(prevMessages => {
+  //         const updatedMessages = {
+  //           ...prevMessages,
+  //           [lastMessage.id]: lastMessage
+  //         };
+  //         return updatedMessages;
+  //       });
+  //     }
+  //   }
 
-  }, [lastMessage]);
+  //   fetchLearningHelper();
 
-  return { messages, isLoading: isLoadingRef.current, error, fetchMessages, setMessages, lastMessage, setLastMessage };
+  // }, [lastMessage]);
+
+  return { messages, isLoading: isLoadingRef.current, error, fetchMessages, updateSingleMessage, updateMessages, lastMessage, setLastMessage, fetchLanguageHelper };
 };
