@@ -171,10 +171,11 @@ const MessageRenderer: React.FC<MessageProps> = ({ message, fetchLanguageHelper,
                                 ? 'bg-blue-200'
                                 : word.learned_dictionary.status === 'learning'
                                   ? 'bg-yellow-100'
-                                  : (word.learned_dictionary.status === 'new' || word.learned_dictionary.seen_count > 0)
-                                    ? 'bg-gray-50 text-blue-500'
-                                    : 'bg-white'
-                            : 'bg-white'
+                                  : (word.learned_dictionary.status === 'new' && word.learned_dictionary.seen_count < 3)
+                                    ? 'bg-yellow-200'
+                                    : (word.learned_dictionary.status === 'new' && word.learned_dictionary.seen_count >= 3)
+                                      ? 'bg-red-400' : 'bg-white'
+                              : 'bg-white'
                         } ${selectedWord === word.chinese ? 'row-span-2' : ''}`}
                         onClick={() => handleWordClick(word.chinese, word.english, word.pinyin)}
                       >

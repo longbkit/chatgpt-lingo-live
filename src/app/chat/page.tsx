@@ -180,7 +180,7 @@ const ChatPage: React.FC = () => {
                       variant="outline"
                       size="xl"
                       onClick={() => setInput(idea.chinese)}
-                      className="w-full text-left overflow-hidden text-ellipsis p-2"
+                      className="w-full text-left text-md overflow-hidden text-ellipsis p-2"
                     >
                       <div className="flex flex-col">
                         <div className="flex justify-between items-center">
@@ -193,8 +193,8 @@ const ChatPage: React.FC = () => {
                             {category}
                           </small>
                         </div>
-                        <p className="text-xs text-gray-500">{idea.pinyin}</p>
-                        <p className="text-xs text-gray-500">{idea.english}</p>
+                        <p className="text-sm text-gray-500">{idea.pinyin}</p>
+                        <p className="text-sm text-gray-500">{idea.english}</p>
                       </div>
                     </Button>
                   </div>
