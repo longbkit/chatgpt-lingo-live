@@ -35,6 +35,22 @@ export const getLearnedDictionaries = async (profileId: string, texts: string[])
   return response.data;
 };
 
+export const getLearnedWordsCount = async (profileId: string, fromDate?: Date) => {
+  const fromDateFilter = fromDate ? `filter=created_at||$gte||${fromDate.toISOString()}&or=updated_at||$gte||${fromDate.toISOString()}` : '';
+  const response = await axios.get(`${API_DIRECT_URL}/learned-dictionaries?filter=profile_id||$eq||${profileId}&${fromDateFilter}&limit=1&page=1`);
+  return response.data.total;
+};
+
+export const getTotalWordsLearned = async (profileId: string) => {
+  return await getLearnedWordsCount(profileId);
+}
+
+export const getWordsLearnedToday = async (profileId: string) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Strip the time part
+  return await getLearnedWordsCount(profileId, today);
+}
+
 export const getOneLearnedDictionary = async (profileId: string, dictionaryId: string) => {
   const response = await axios.get(`${API_DIRECT_URL}/learned-dictionaries?filter=profile_id||$eq||${profileId}&filter=dictionary_id||$eq||${dictionaryId}`);
   return response.data && response.data.length > 0 ? response.data[0] : null;

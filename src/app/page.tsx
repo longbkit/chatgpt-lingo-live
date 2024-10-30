@@ -1,19 +1,38 @@
-import React from 'react';
+'use client';
+
+import React, { useState , useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Home, MessageCircle, BookOpen, User } from 'lucide-react';
+import { getLearnedWordsCount, getTotalWordsLearned, getWordsLearnedToday } from '@/apis/language-backend';
+
+const profileId = 'fa307f6f-953c-4354-aac6-845911381506';
 
 export default function HomePage() {
-  const metrics = {
-    wordsLearned: 150,
-    streak: 7,
+  const [metrics, setMetrics] = useState<any>({ 
+    wordsLearned: 0,
+    streak: 0,
     dailyGoal: 20,
-    wordsToday: 15,
-    totalXP: 1250,
-    level: 5,
-  };
+    wordsToday: 0,
+    totalXP: 0,
+    level: 0});
+
+  useEffect(() => {
+    const fetchLearnedWordsCount = async () => {
+      const learnedWordsCount = await getWordsLearnedToday(profileId);
+      const totalWordsLearned = await getTotalWordsLearned(profileId);
+      setMetrics((prevMetrics: any) => ({
+        ...prevMetrics,
+        wordsLearned: totalWordsLearned,
+        wordsToday: learnedWordsCount,
+        totalXP: totalWordsLearned,
+      }));
+    };
+    fetchLearnedWordsCount();
+  }, []);
+
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -44,6 +63,21 @@ export default function HomePage() {
               <CardContent className="pt-6">
                 <p className="text-3xl font-bold">{metrics.totalXP}</p>
                 <p className="text-sm text-muted-foreground">Total XP</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-3xl font-bold">{metrics.wordsToday}</p>
+                <p className="text-sm text-muted-foreground">Words Learned Today</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-3xl font-bold">{metrics.wordsLearned}</p>
+                <p className="text-sm text-muted-foreground">Total Words Learned</p>
               </CardContent>
             </Card>
           </div>
