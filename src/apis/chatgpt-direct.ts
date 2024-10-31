@@ -2,14 +2,15 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 const API_DIRECT_URL = 'https://cors-anywhere-lilac-two.vercel.app/chatgpt.com/backend-api';
-// const API_DIRECT_URL = 'http://localhost:8080/https://chatgpt.com/backend-api';
+// const API_DIRECT_URL = 'http://localhost:8080/chatgpt.com/backend-api';
 
 
 export const getConversation = async (chatId: string) => {
   const storedToken = localStorage.getItem('apiToken') || '';
   const response = await axios.get(`${API_DIRECT_URL}/conversation/${chatId}`, {
     headers: {
-      'Authorization': `Bearer ${storedToken}`
+      'Authorization': `Bearer ${storedToken}`,
+      'x-requested-with': 'https://chatgpt.com/c/${chatId}',
     }
   });
   return response.data;

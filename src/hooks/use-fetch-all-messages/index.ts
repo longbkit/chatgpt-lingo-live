@@ -4,6 +4,8 @@ import { getConversation } from "../../apis/chatgpt-direct";
 // import { getLanguageHelper } from "./get-language-helper";
 import { getLanguageHelperManual as getLanguageHelper } from "./get-language-helper-manual";
 import { getLearnedWords } from "../../apis/language-backend";
+import { getSuggestionIdeas } from "./get-language-helper-manual";
+
 
 export interface MessagePart {
   content_type: string;
@@ -61,7 +63,7 @@ const processMessages = (data: ApiResponse): Record<string, Message> => {
   return messages;
 };
 
-const getMessageTextContent = (message: Message): string => {
+export const getMessageTextContent = (message: Message): string => {
   if (Array.isArray(message.content.parts)) {
     return message.content.parts.map((part: string | MessagePart) => 
       typeof part === 'string' ? part : part?.text
@@ -223,3 +225,7 @@ export const useGetAllMessages = () => {
 
   return { messages, isLoading: isLoadingRef.current, error, fetchMessages, updateSingleMessage, updateMessages, lastMessage, setLastMessage, fetchLanguageHelper };
 };
+
+
+export { getSuggestionIdeas };
+

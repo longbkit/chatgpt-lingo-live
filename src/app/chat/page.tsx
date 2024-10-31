@@ -13,7 +13,8 @@ import { chatModel } from "@/lib/langchain-setup";
 import { v4 as uuidv4 } from 'uuid';
 import { SettingsPanel } from './settings-panel';
 import { useSettings } from '@/hooks/use-settings';
-import { Message } from '@/hooks/use-fetch-all-messages';
+import { Message, getSuggestionIdeas, getMessageTextContent } from '@/hooks/use-fetch-all-messages';
+import { getSystemErrorMap } from 'util';
 
 
 const ChatPage: React.FC = () => {
@@ -21,12 +22,13 @@ const ChatPage: React.FC = () => {
   const [token, setToken] = useState<string>('');
   const [chatId, setChatId] = useState<string>('');
   const [input, setInput] = useState('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<any>({});
   const [showGoToTop, setShowGoToTop] = useState<boolean>(false);
   const [showGoToBottom, setShowGoToBottom] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesStartRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const {
     refreshInterval,
     setRefreshInterval,
@@ -70,11 +72,35 @@ const ChatPage: React.FC = () => {
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!lastMessage?.language_helper) {
+      // setIdeas(lastMessage.language_helper.ideas);
+      // console.log('lastMessage.language_helper.ideas', lastMessage.language_helper.ideas);
+      const getSuggestions = async () => {
+        const lastTwoMessages = Object.values(messages).slice(-2).map((message: any) => ({
+          role: message.author.role,
+          content: getMessageTextContent(message)
+        }));
+
+        if (lastTwoMessages.length === 2) {
+          const suggestions = await getSuggestionIdeas(lastTwoMessages);
+          if (suggestions) {
+            console.log('suggestions', suggestions);
+            setSuggestions(suggestions);
+          }
+        }
+      }
+      getSuggestions();
+      
+    }
+  }, [lastMessage]);
+
 
   useEffect(() => {
     // scroll to bottom if the user is already scrolled to the bottom
-    if (autoScroll && !showGoToBottom && messagesEndRef.current) {
+    if (isFirstLoad || (autoScroll && !showGoToBottom && messagesEndRef.current)) {
       scrollToBottom();
+      setIsFirstLoad(false);
     }
   }, [messages]);
 
@@ -135,7 +161,7 @@ const ChatPage: React.FC = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] border-2 border-gray-200 p-2 rounded-lg mt-4 pt-2">
       <div ref={scrollContainerRef} className="flex-grow overflow-y-auto rounded-lg" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        <div className="fixed w-full top-2 z-50">
+        <div className="sticky w-full top-2 right-0 z-50">
           <SettingsPanel
             refreshInterval={refreshInterval}
             setRefreshInterval={setRefreshInterval}
@@ -167,11 +193,11 @@ const ChatPage: React.FC = () => {
       </div>
      
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-50 mb-14">
-        {lastMessage?.language_helper?.ideas && (
+        {Object.keys(suggestions).length > 0 && (
           <div className="mb-4 overflow-x-auto">
             <div className="px-16 flex gap-2">
               {['standard', 'open', 'creative'].map((category: string) => (
-                lastMessage.language_helper.ideas[category].map((idea: any, index: number) => (
+                suggestions[category]?.map((idea: any, index: number) => (
                   <div
                     key={`${category}-${index}`}
                     className="relative group"

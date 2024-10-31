@@ -117,8 +117,8 @@ export const SettingsPanel = memo(({
   }, [chatId]);
 
   return (
-    <div className={` w-full p-4 pt-2`}>
-      <div className="rounded-lg border-1 border ">
+    <div className={`z-50 w-full p-4 pt-2`}>
+      <div className="">
         <Button
           onClick={fetchAndStartTimer}
           className="mr-4"
@@ -145,7 +145,10 @@ export const SettingsPanel = memo(({
               options={conversations}
               value={chatId}
               placeholder="Select a conversation"
-              onChange={(id: string) => setChatId(id)}
+              onChange={(id: string) => {
+                setChatId(id);
+                localStorage.setItem('chatId', id);
+              }}
             />
 
             <Button onClick={() => localStorage.removeItem('chatMessages')}>

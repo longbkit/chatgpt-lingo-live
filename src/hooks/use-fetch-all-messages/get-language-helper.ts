@@ -50,22 +50,25 @@ export const getLanguageHelper = async (textContent: string) => {
   const prompt = `
   Analyze the following Chinese text and provide a structured breakdown:
 
-  1. Words: Extract key Chinese words.
-  2. Phrases: Identify meaningful and common phrases (not full sentences).
-  3. Sentences: Select complete sentences from the text.
-  4. Ideas: Suggest user with answer ideas in three categories:
+  1. Words: Extract 3-10 key Chinese words.
+  2. Phrases: Identify 2-5 meaningful and common phrases (not full sentences).
+  3. Sentences: Select 1-3 complete sentences from the text.
+  4. Ideas: Suggest continuation ideas in three categories:
      - Standard: 1-2 straightforward follow-ups
      - Open: 1-2 thought-provoking questions or topics
      - Creative: 1-2 unique or unexpected directions
 
-  For each item, provide the English translation, Pinyin romanization, and Chinese characters.
+  For each item:
+  - Provide the Chinese characters
+  - Include Pinyin romanization
+  - Give English translations
 
-  For phrases, also provide example usages with Chinese, Pinyin, and English.
+  For phrases, also provide 1-3 example usages with Chinese, Pinyin, and English.
 
   Ensure all Chinese content is suitable for a 6-year-old native speaker's level.
 
   Text to analyze: ${textContent}
-  
+
   Please return the response in the following JSON format:
   {
     "words": [
