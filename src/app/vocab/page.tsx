@@ -168,7 +168,7 @@ const VocabBuilding: React.FC = () => {
                     <>
                       <div className="text-sm text-gray-500">{word.dictionary.pinyin}</div>
                       <div className="text-sm">{word.dictionary.definition}</div>
-                      <div className="flex flex-col gap-2 pt-2 mt-auto">
+                      <div className="flex flex-col gap-2 pt-2 pb-2 mt-auto">
                         <Button className="bg-green-500 text-white px-2 py-1 w-full rounded" onClick={() => handleLearnedDictionary(word, true)}>Learned</Button>
                         <Button className="bg-yellow-500 text-white px-2 py-1 w-full rounded" onClick={() => handleLearnedDictionary(word, false)}>Need Review</Button>
                       </div>
