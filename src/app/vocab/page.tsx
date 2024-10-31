@@ -105,12 +105,13 @@ const VocabBuilding: React.FC = () => {
             <CardTitle>{wordsForReview[currentCardIndex].dictionary.text}</CardTitle>
           </CardHeader>
           <CardContent>
-            {showTranslation && (
-              <>
-                <p className="text-lg mb-0 text-gray-500">{wordsForReview[currentCardIndex].dictionary.pinyin}</p>
-                <p className="text-lg mb-4 text-blue-700">{wordsForReview[currentCardIndex].dictionary.definition}</p>
-              </>
-            )}
+            <details className="mb-4">
+              <summary className="cursor-pointer text-blue-500" onClick={() => setShowTranslation(!showTranslation)}>
+                {showTranslation ? 'Hide Translation' : 'Show Translation'}
+              </summary>
+              <p className="text-lg mb-0 text-gray-500">{wordsForReview[currentCardIndex].dictionary.pinyin}</p>
+              <p className="text-lg mb-4 text-blue-700">{wordsForReview[currentCardIndex].dictionary.definition}</p>
+            </details>
             <div className="flex justify-between mb-4">
               <div className='flex gap-2'>
                 <Button
@@ -126,12 +127,6 @@ const VocabBuilding: React.FC = () => {
                   Add to Review
                 </Button>
               </div>
-              <Button
-                onClick={() => setShowTranslation(!showTranslation)}
-                variant="outline"
-              >
-                {showTranslation ? 'Hide Translation' : 'Show Translation'}
-              </Button>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
               <span>Seen:</span> <span className="font-semibold">{wordsForReview[currentCardIndex].seen_count}</span> | &nbsp;
