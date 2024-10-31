@@ -3,7 +3,7 @@ import { getConversation } from "../../apis/chatgpt-direct";
 // import { v4 as uuidv4 } from 'uuid';
 // import { getLanguageHelper } from "./get-language-helper";
 import { getLanguageHelperManual as getLanguageHelper } from "./get-language-helper-manual";
-import { getLearnedDictionaries } from "../../apis/language-backend";
+import { getLearnedWords } from "../../apis/language-backend";
 
 export interface MessagePart {
   content_type: string;
@@ -179,7 +179,7 @@ export const useGetAllMessages = () => {
       console.log('languageHelper', languageHelper);
       if (languageHelper.words) {
         const words = languageHelper.words.map((word: any) => word.chinese);
-        const learnedDictionaries = await getLearnedDictionaries(profileId, words);
+        const learnedDictionaries = await getLearnedWords(profileId, words);
         languageHelper.words = languageHelper.words.map((word: any) => {
           const learnedDictionary = learnedDictionaries.find((learnedDictionary: any) => learnedDictionary.dictionary.text === word.chinese);
           return {
@@ -197,7 +197,7 @@ export const useGetAllMessages = () => {
   //   const fetchLearningHelper = async () => {
   //     if (lastMessage && lastMessage.language_helper?.words && !lastMessage.learning_helper) {
   //       const words = lastMessage.language_helper.words.map((word: any) => word.chinese);
-  //       const learnedDictionaries = await getLearnedDictionaries(profileId, words);
+  //       const learnedDictionaries = await getLearnedWords(profileId, words);
   //       console.log('learnedDictionaries', learnedDictionaries);
   //       // lastMessage['learning_helper'] = learnedDictionaries;
   //       lastMessage.language_helper.words = lastMessage.language_helper.words.map((word: any) => {

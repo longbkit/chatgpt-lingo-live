@@ -30,14 +30,34 @@ export const patchLearningProfile = async (profileId: string, learningProfile: U
   return response.data;
 };
 
-export const getLearnedDictionaries = async (profileId: string, texts: string[]) => {
-  const response = await axios.get(`${API_DIRECT_URL}/learned-dictionaries?filter=profile_id||$eq||${profileId}&filter=dictionary.text||$in||${texts.join(',')}&join=dictionary`);
+export const getLearnedWords = async (profileId: string, texts?: string[]) => {
+  const textsFilter = texts ? `&filter=dictionary.text||$in||${texts.join(',')}` : '';
+  const sort = !texts ? '&sort=updated_at,DESC' : '';
+  const response = await axios.get(`${API_DIRECT_URL}/learned-dictionaries?filter=profile_id||$eq||${profileId}${textsFilter}&join=dictionary${sort}`);
+  return response.data;
+};
+
+export const getWordsForReview = async (profileId: string) => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0); // Set to start of next day
+  const response = await axios.get(`${API_DIRECT_URL}/learned-dictionaries?filter=profile_id||$eq||${profileId}&filter=next_review||$lt||${tomorrow.toISOString()}&join=dictionary&sort=seen_count,DESC`);
   return response.data;
 };
 
 export const getLearnedWordsCount = async (profileId: string, fromDate?: Date) => {
-  const fromDateFilter = fromDate ? `filter=created_at||$gte||${fromDate.toISOString()}&or=updated_at||$gte||${fromDate.toISOString()}` : '';
-  const response = await axios.get(`${API_DIRECT_URL}/learned-dictionaries?filter=profile_id||$eq||${profileId}&${fromDateFilter}&limit=1&page=1`);
+  const fromDateFilter = fromDate ? {
+    $or: [
+      { created_at: { $gte: fromDate.toISOString() } },
+      { updated_at: { $gte: fromDate.toISOString() } }
+    ]
+  } : {};
+  const response = await axios.get(`${API_DIRECT_URL}/learned-dictionaries?s=${encodeURIComponent(JSON.stringify({
+    $and: [
+      { profile_id: { $eq: profileId } },
+      fromDateFilter
+    ]
+  }))}&limit=1&page=1`);
   return response.data.total;
 };
 
